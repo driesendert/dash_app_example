@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[68]:
 
 
 import dash
@@ -10,7 +10,9 @@ import dash_html_components as html
 import plotly.graph_objs as go
 import pandas as pd
 
-app = dash.Dash(__name__)
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
 app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
@@ -30,9 +32,17 @@ available_countries = df['GEO'].unique()
 
 app.layout = html.Div([
     html.H1(children='Economic Indicators in European Countries', 
+               style={'textAlign': 'center', 'color':'rgb(153, 0, 76)'}),
+    html.H3(children='(To specify a country, hover your mouse over the datapoint)',
                style={'textAlign': 'center'}),
-    html.H2(children='Interactive Graph 1', 
-               style={'textAlign': 'center', 'padding-top':10}),
+    html.Div([
+        
+    html.H2(children='All European Countries', 
+               style={'width': '49%', 'float': 'left', 'display': 'inline-block', 'textAlign': 'center', 'padding-top':10}),
+    html.H2(children='Specified Country',
+                style={'width':'49%', 'display': 'inline-block','textAlign': 'center', 'padding-top':10}),
+    ]),
+    
     html.Div([
 
         html.Div([
@@ -43,7 +53,7 @@ app.layout = html.Div([
                 value='Wages and salaries' 
             )
         ],
-        style={'width': '48%', 'display': 'inline-block', 'padding-top':10, 'padding-bottom':20}),
+        style={'width': '24.5%', 'display': 'inline-block', 'padding-top':10, 'padding-bottom':20, 'padding-right':10}),
 
         html.Div([
             html.Label('Select indicator (y-axis):'),
@@ -52,46 +62,9 @@ app.layout = html.Div([
                 options=[{'label': i, 'value': i} for i in available_indicators],
                 value='Gross domestic product at market prices'
             )
-        ],style={'width': '48%', 'float': 'right', 'display': 'inline-block', 'padding-top':10, 'padding-bottom':20})
-    ]),
-    
-    html.Div([
-        html.Label('Select unit:', 
-                   style={'width':'100%','display':'inline-block','textAlign':'center'}),
-        dcc.RadioItems(
-            id='unit_selection',
-            options=[{'label': i, 'value': i} for i in available_units],
-            value='Current prices, million euro',
-            labelStyle={'display': 'inline-block',},
-        style={'textAlign':'center'})
-    ]),
-        
-    dcc.Graph(id='indicator-graphic'),
-
-    html.Label('Select year:'),
-    dcc.Slider(
-        id='TIME--slider',
-        min=df['TIME'].min(),
-        max=df['TIME'].max(),
-        value=df['TIME'].max(),
-        step=None,
-        marks={str(TIME): str(TIME) for TIME in df['TIME'].unique()}
-    ),
-    
-    html.Div([
-        
-        html.H2(children='Interactive Graph 2',
-                style={'textAlign': 'center', 'padding-top':100}),
-        html.Div([
-            html.Label('Select country:'),
-            dcc.Dropdown(
-                id='country_choice',
-                options=[{'label': i, 'value': i} for i in available_countries],
-                value='Belgium' 
-            ),
         ],
-        style={'width': '48%', 'display': 'inline-block', 'padding-top':10, 'padding-bottom':20}),
-
+        style={'width': '24.5%', 'float': 'left', 'display': 'inline-block', 'padding-top':10, 'padding-bottom':20}),
+        
         html.Div([
             html.Label('Select indicator: '),
             dcc.Dropdown(
@@ -99,34 +72,63 @@ app.layout = html.Div([
                 options=[{'label': i, 'value': i} for i in available_indicators],
                 value='Gross domestic product at market prices'
             )
-        ],style={'width': '48%', 'float': 'right', 'display': 'inline-block', 'padding-top':10, 'padding-bottom':20})
+        ],
+        style={'width': '49%', 'display': 'inline-block', 'padding-top':10, 'padding-bottom':20})
     ]),
-
+    
     html.Div([
-        html.Label('Select unit:', 
-                   style={'width':'100%','display':'inline-block','textAlign':'center'}),
-        dcc.RadioItems(
-            id='unit_selection2',
-            options=[{'label': i, 'value': i} for i in available_units],
-            value='Current prices, million euro',
-            labelStyle={'display': 'inline-block'},
-        style={'textAlign':'center'})
-    ]),
         
-    dcc.Graph(id='country-graphic'),
+        html.Div([
+            html.Label('Select unit:', 
+                       style={'width':'49%','display':'block'}),
+            dcc.Dropdown(
+                id='unit_selection',
+                options=[{'label': i, 'value': i} for i in available_units],
+                value='Current prices, million euro'
+            )
+        ],
+            style={'width': '49%','float':'left','display': 'inline-block', 'padding-top':10, 'padding-bottom':20, 'padding-right':10}),
+    
+        html.Div([
+            html.Label('Select unit:', 
+                       style={'width':'100%','display':'inline-block'}),
+            dcc.Dropdown(
+                id='unit_selection2',
+                options=[{'label': i, 'value': i} for i in available_units],
+                value='Current prices, million euro'
+            )
+        ],
+        style={'width': '49%', 'display': 'inline-block', 'padding-top':10, 'padding-bottom':20})
+    
+    ]), 
+    
+    html.Div([
+        dcc.Graph(
+            id='indicator-graphic',
+            hoverData={'points': [{'customdata': 'Belgium'}]}
+        )
+    ], style={'width': '49%', 'display': 'inline-block'}),
+    html.Div([
+        dcc.Graph(id='country-graphic'),
+    ], style={'display': 'inline-block', 'width': '49%'}),
 
+    html.Div(dcc.Slider(
+        id='TIME--slider',
+        min=df['TIME'].min(),
+        max=df['TIME'].max(),
+        value=df['TIME'].max(),
+        marks={str(TIME): str(TIME) for TIME in df['TIME'].unique()}
+    ), style={'width': '49%', 'padding': '0px 20px 20px 20px'})
 ])
 
-
-@app.callback(
-    dash.dependencies.Output('indicator-graphic', 'figure'),
-     [dash.dependencies.Input('xaxis-column', 'value'),
+    
+@app.callback(dash.dependencies.Output('indicator-graphic', 'figure'),
+    [dash.dependencies.Input('xaxis-column', 'value'),
       dash.dependencies.Input('yaxis-column', 'value'),
      dash.dependencies.Input('unit_selection', 'value'),
      dash.dependencies.Input('TIME--slider', 'value')])
-
-def update_graph(xaxis_column_name, yaxis_column_name,
-                 select_unit, year_value):
+    
+def update_graph(xaxis_column_name, yaxis_column_name, select_unit, year_value):
     dff = df[df['TIME'] == year_value]
     dfn = dff[dff['UNIT'] == select_unit]
     return {
@@ -134,45 +136,49 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             x=dfn[dfn['NA_ITEM'] == xaxis_column_name]['Value'],
             y=dfn[dfn['NA_ITEM'] == yaxis_column_name]['Value'],
             text=dfn[dfn['NA_ITEM'] == yaxis_column_name]['GEO'],
-            mode='markers',
+            customdata=dfn[dfn['NA_ITEM'] == yaxis_column_name]['GEO'],
+            mode='markers', 
             marker={
                 'size': 15,
                 'opacity': 0.5,
-                'line': {'width': 0.5, 'color': 'white'}
-            }
+                'line': {'width': 0.5, 'color': 'white'}},
+            line=dict(color=('rgb(153, 0, 76)'))
         )],
         'layout': go.Layout(
             xaxis={
                 'title': xaxis_column_name},
             yaxis={
                 'title': yaxis_column_name},
-            margin={'l': 65, 'b': 40, 't': 10, 'r': 0},
-            hovermode='closest'
+            margin={'l': 75, 'b': 40, 't': 50, 'r': 0},
+            hovermode='closest',
+            title= 'All European Countries'
         )
     }
 
 @app.callback(
     dash.dependencies.Output('country-graphic', 'figure'), 
-     [dash.dependencies.Input('country_choice', 'value'),
+     [dash.dependencies.Input('indicator-graphic', 'hoverData'),
       dash.dependencies.Input('unit_selection2', 'value'), 
       dash.dependencies.Input('yaxis', 'value')])
 
-def update_graph2(country, select_unit2, yaxis_column_name_2):
-    dfi = df[df['GEO'] == country]
+def update_graph2(hoverData, select_unit2, yaxis_column_name_2):
+    dfi = df[df['GEO'] == hoverData['points'][0]['customdata']]
     dfk = dfi[dfi['UNIT'] == select_unit2]
     
     return {
         'data': [go.Scatter(
             y=dfk[dfk['NA_ITEM'] == yaxis_column_name_2]['Value'], 
-            x=dfk['TIME'].unique()
+            x=dfk['TIME'].unique(),
+            line=dict(color=('rgb(153, 0, 76)'))
         )],
         'layout': go.Layout(
             xaxis={
                 'title': 'Years'},
             yaxis={
                 'title': yaxis_column_name_2},
-            margin={'l': 75, 'b': 40, 't': 10, 'r': 0},
+            margin={'l': 75, 'b': 40, 't': 50, 'r': 0},
             hovermode='closest',
+            title= hoverData['points'][0]['customdata']
         )
     }
     
